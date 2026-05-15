@@ -1,6 +1,6 @@
 # Movie Chatbot
 
-Backend em Python para um chatbot de filmes usando FastAPI, LangGraph, LLMs e a API do TMDB.
+Chatbot de filmes com backend em Python/FastAPI e frontend em Next.js.
 
 ## Visao Geral
 
@@ -27,24 +27,36 @@ POST /chat
 - Google GenAI
 - HTTPX
 - Pydantic
+- Next.js
+- React
 - Docker e Docker Compose
 
 ## Estrutura
 
 ```text
-app/
-  api/routes/          Rotas HTTP
-  agents/             Definicoes e registro de agentes
-  graph/              Builder e nodes do LangGraph
-  mcp/                MCPs e tools disponiveis
-  services/           Providers de LLM e integracoes externas
-  schemas/            Schemas Pydantic
-  states/             Estado compartilhado do grafo
+backend/
+  Dockerfile
+  .env
+  app/
+    api/routes/        Rotas HTTP
+    agents/           Definicoes e registro de agentes
+    graph/            Builder e nodes do LangGraph
+    mcp/              MCPs e tools disponiveis
+    services/         Providers de LLM e integracoes externas
+    schemas/          Schemas Pydantic
+    states/           Estado compartilhado do grafo
+
+frontend/
+  Dockerfile
+  .env.local
+  app/
+  components/
+  services/
 ```
 
 ## Variaveis de Ambiente
 
-Crie um arquivo `.env` na raiz do projeto:
+Crie um arquivo `backend/.env`:
 
 ```env
 APP_NAME=Movie AI
@@ -59,14 +71,26 @@ LLM_MODEL=llama3-8b-8192
 LLM_TEMPERATURE=0.7
 ```
 
-Observacao: o `.env` nao deve ser versionado.
+Crie um arquivo `frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+Observacao: arquivos `.env` nao devem ser versionados.
 
 ## Rodando com Docker
 
-Suba a aplicacao com:
+Suba backend e frontend com:
 
 ```bash
 docker compose up --build
+```
+
+O frontend ficara disponivel em:
+
+```text
+http://localhost:3000/chat
 ```
 
 A API ficara disponivel em:
@@ -83,9 +107,12 @@ http://localhost:8000/docs
 
 ## Rodando Localmente
 
+### Backend
+
 Crie e ative um ambiente virtual:
 
 ```bash
+cd backend
 python3 -m venv venv
 source venv/bin/activate
 ```
@@ -99,7 +126,23 @@ pip install -r requirements.txt
 Inicie a API:
 
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+cd ..
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Frontend
+
+Instale as dependencias:
+
+```bash
+cd frontend
+npm install
+```
+
+Inicie o Next.js:
+
+```bash
+npm run dev
 ```
 
 ## Endpoint Principal
@@ -127,7 +170,7 @@ Exemplo de body:
 Checar sintaxe dos arquivos Python:
 
 ```bash
-python3 -m compileall app
+backend/venv/bin/python -m compileall backend/app
 ```
 
 Checar dependencias instaladas:
@@ -146,4 +189,5 @@ docker compose config --quiet
 
 - O provider padrao e `groq`.
 - A integracao com o TMDB depende de `TMDB_API_TOKEN`.
-- O Docker Compose monta `./app:/app/app`, entao alteracoes no codigo sao refletidas durante o desenvolvimento.
+- O Docker Compose monta `./backend/app:/app/backend/app`, entao alteracoes no backend sao refletidas durante o desenvolvimento.
+- O frontend usa `NEXT_PUBLIC_API_URL=http://localhost:8000` para o navegador chamar a API local.

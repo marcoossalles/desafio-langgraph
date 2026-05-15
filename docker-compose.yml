@@ -1,14 +1,31 @@
 services:
-  movie-chatbot:
+  backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
-    container_name: movie-chatbot
+    container_name: movie-chatbot-backend
     env_file:
-      - .env
+      - ./backend/.env
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      - ./backend/app:/app/backend/app
+    command: uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: movie-chatbot-frontend
+    env_file:
+      - ./frontend/.env.local
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
     restart: unless-stopped
